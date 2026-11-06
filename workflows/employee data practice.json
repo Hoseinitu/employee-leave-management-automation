@@ -1,0 +1,779 @@
+{
+  "name": "employee data practice",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -768,
+        0
+      ],
+      "id": "f246e898-084b-4ea7-b312-eddb8af5f061",
+      "name": "When clicking ‘Execute workflow’",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 4
+          },
+          "conditions": [
+            {
+              "id": "05d32ea6-bb4d-48c3-acbb-c05b1f289030",
+              "leftValue": "={{ $('Leave Request Data').item.json.endDate }}",
+              "rightValue": "={{ $('Leave Request Data').item.json.startDate }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "afterOrEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.4,
+      "position": [
+        528,
+        0
+      ],
+      "id": "cdf74349-872d-4bf0-8ad5-fd9e40757e6a",
+      "name": "Validate Leave Days"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d091fac6-1481-449f-b0df-f042bce2e204",
+              "name": "Name",
+              "value": "={{ $json[\"Full Name\"] }}",
+              "type": "string"
+            },
+            {
+              "id": "6e640407-27f0-4239-a817-3a4a40f62ccd",
+              "name": "Department",
+              "value": "={{ $json[\"department\"] }}",
+              "type": "string"
+            },
+            {
+              "id": "51172a56-898f-409d-bbf6-f8876a93eacd",
+              "name": "startDate",
+              "value": "={{ $json[\"Start Date\"] }}",
+              "type": "string"
+            },
+            {
+              "id": "47fbffa6-1897-44e5-a3a4-90b929a51248",
+              "name": "endDate",
+              "value": "={{ $json[\"End Date\"] }}",
+              "type": "string"
+            },
+            {
+              "id": "11e5a31b-7d98-43d6-b759-d55f4c0b67ef",
+              "name": "email",
+              "value": "={{ $json[\"Email Address\"] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        112,
+        0
+      ],
+      "id": "fe3eca00-7c5f-4770-a8b4-2285c9ec9e50",
+      "name": "Leave Request Data"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4fa965d7-409d-47a8-8263-02a3aa3cd79e",
+              "name": "leaveDays",
+              "value": "={{ Math.floor((new Date($json.endDate) - new Date($json.startDate)) / 86400000) + 1 }}",
+              "type": "number"
+            },
+            {
+              "id": "41cfe4d7-f0de-4366-8e3a-42a67b2e2f89",
+              "name": "",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        336,
+        0
+      ],
+      "id": "754d1adf-3d0c-4171-8796-9412ea390364",
+      "name": "Calculate Leave Duration"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "bsfuxbLSKbZsXpUT",
+          "mode": "list",
+          "cachedResultName": "LeaveRequests",
+          "cachedResultUrl": "/projects/qZFL44Xa3P7jrN3O/datatables/bsfuxbLSKbZsXpUT"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "name",
+              "keyValue": "={{ $('Leave Request Data').first().json.Name }}"
+            },
+            {
+              "keyName": "startDate",
+              "keyValue": "={{ $('Leave Request Data').first().json.startDate }}"
+            },
+            {
+              "keyName": "endDate",
+              "keyValue": "={{ $('Leave Request Data').first().json.endDate }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        704,
+        -80
+      ],
+      "id": "89c6fd02-e29f-4493-80e6-e1660b8c11b9",
+      "name": "Check Existing Request",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 4
+          },
+          "conditions": [
+            {
+              "id": "f24bc465-d118-4bb6-814d-952a034ca52d",
+              "leftValue": "={{ !!$json.id }}",
+              "rightValue": "0",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.4,
+      "position": [
+        912,
+        -80
+      ],
+      "id": "993376da-221d-45df-b5e1-0b01dbe9fd51",
+      "name": "Is Request Duplicate?"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "bsfuxbLSKbZsXpUT",
+          "mode": "list",
+          "cachedResultName": "LeaveRequests",
+          "cachedResultUrl": "/projects/qZFL44Xa3P7jrN3O/datatables/bsfuxbLSKbZsXpUT"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "name": "={{ $('Leave Request Data').item.json.Name }}",
+            "department": "={{ $('Leave Request Data').item.json.Department}}",
+            "leaveDays": "={{ $('Calculate Leave Duration').item.json.leaveDays }}",
+            "status": "={{ $('Leave Request Data').item.json.leaveDays > 3 ? 'Normal Approval' : ' Pending Approval'}}",
+            "requestDate": "={{  $now.toISO() }}",
+            "startDate": "={{ $('Leave Request Data').item.json.startDate }}",
+            "endDate": "={{ $('Leave Request Data').item.json.endDate }}",
+            "email": "={{ $('Leave Request Data').item.json.email }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "department",
+              "displayName": "department",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "leaveDays",
+              "displayName": "leaveDays",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "requestDate",
+              "displayName": "requestDate",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "startDate",
+              "displayName": "startDate",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "endDate",
+              "displayName": "endDate",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "optimizeBulk": false
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        704,
+        -256
+      ],
+      "id": "4ec77abc-aa86-4f69-bc8a-9341fc63bc25",
+      "name": "Save Leave Request"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 4
+          },
+          "conditions": [
+            {
+              "id": "d942716f-3152-4a24-b657-6614316e6581",
+              "leftValue": "={{ $json.leaveDays }}",
+              "rightValue": 3,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.4,
+      "position": [
+        912,
+        -256
+      ],
+      "id": "a0577817-f1e4-4db5-be71-709a57beb4fe",
+      "name": "Leave Over 3 Days"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8d14c693-d26a-4fba-b31e-ea72b98096c8",
+              "name": "Message",
+              "value": "=New Leave Request\n\nEmployee Name: {{ $('Leave Request Data').item.json.Name }}\nDepartment: {{ $('Leave Request Data').item.json.Department }}\nStart Date: {{ $('Leave Request Data').item.json.startDate }}\nEnd Date: {{ $('Leave Request Data').item.json.endDate }}\nLeave Duration: {{ $('Calculate Leave Duration').item.json.leaveDays }} days\n{{ $('Leave Request Data').item.json.email }}\n\nStatus: Pending Manager Approval",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1296,
+        -368
+      ],
+      "id": "dfd82e62-f7e5-4fdd-b8cf-515a70398ace",
+      "name": "Prepare Manager Email"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1381f546-4310-4417-b564-df87cb6e682e",
+              "name": "Message",
+              "value": "=Your leave request has been received successfully.\n\nEmployee: {{ $('Leave Request Data').item.json.Name }}\nDepartment: {{ $('Leave Request Data').item.json.Department }}\nEmail: {{ $('Leave Request Data').item.json.email }}\nStart Date: {{ $('Leave Request Data').item.json.startDate }}\nEnd Date: {{ $('Leave Request Data').item.json.endDate }}\n\nYour request is being processed.",
+              "type": "string"
+            },
+            {
+              "id": "0adfa62f-e5b8-46dd-8c95-69ae6ea48b4f",
+              "name": "",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1312,
+        -128
+      ],
+      "id": "73c29358-f7df-46e2-bdc8-05c77abf54f2",
+      "name": "Prepare Employee Email"
+    },
+    {
+      "parameters": {
+        "fromEmail": "hr@example.com",
+        "toEmail": "hr@example.com",
+        "subject": "Leave Request - Manager Approval",
+        "emailFormat": "=text",
+        "text": "=Hello\n\nA new approval request signed.\n\nEmployee Name: {{ $('Leave Request Data').item.json.Name }}\n\nDepartment: {{ $('Leave Request Data').item.json.Department }}\n\nApproval Duration: {{ $('Calculate Leave Duration').item.json.leaveDays }} Days\nStart Date: {{ $('Leave Request Data').item.json.startDate}}\n\nEnd Date:{{ $('Leave Request Data').item.json.endDate }}\n\nEmployee Email:{{ $('Leave Request Data').item.json.email }}\n\nThis Request Requiers Manager Approval.\n\n\nPlease check this out.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1504,
+        -368
+      ],
+      "id": "8a1185ff-4093-4f32-806d-89e8c0a26d0d",
+      "name": "Send Manager Email",
+      "webhookId": "85231891-7562-4251-8d2f-19872de8af8b",
+      "credentials": {
+        "smtp": {
+          "id": "4cXPcBVgXkBKapSf",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "hr@example.com",
+        "toEmail": "={{ $('Leave Request Data').item.json.email }}",
+        "subject": "Leave Request - Normal Approval",
+        "emailFormat": "text",
+        "text": "=Your leave request has been submitted.\n\nName: {{ $('Leave Request Data').item.json.Name }}\nNumber of days off: {{ $('Calculate Leave Duration').item.json.leaveDays }}\n\nStart Date: {{ $('Leave Request Data').item.json.startDate }}\n\nEnd Date: {{ $('Leave Request Data').item.json.endDate }}\nYour request has been categorized as regular leave.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1504,
+        -128
+      ],
+      "id": "e529d1f9-d09a-4a6b-92fa-70c2c61c9858",
+      "name": "Send Employee Email",
+      "webhookId": "7dcd514e-bdd8-469f-bcce-8448a1d148bf",
+      "credentials": {
+        "smtp": {
+          "id": "4cXPcBVgXkBKapSf",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a0a2f200-fef4-4eb0-932d-fe3f26b095d2",
+              "name": "errorMessage",
+              "value": "Invaild leave dates: the end date cannot be earlier than the start date.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        704,
+        80
+      ],
+      "id": "8135f5a1-b6be-41aa-9c0d-4584305369c6",
+      "name": "Prepare Date Error"
+    },
+    {
+      "parameters": {
+        "errorMessage": "Invaild leave dates:End date cannot be earlier than start date."
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        1072,
+        80
+      ],
+      "id": "5b0997f8-6c71-4329-9bac-9c0feed191ae",
+      "name": "Stop Invaild Date Request"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5ac457a2-d64f-4d13-8287-820e10c817b5",
+              "name": "message",
+              "value": "This request has Already been submited.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1312,
+        48
+      ],
+      "id": "187ae4bd-d508-4425-a614-38feaf64167f",
+      "name": "The Request Is Duplicate"
+    },
+    {
+      "parameters": {
+        "formTitle": "Leave Request Form",
+        "formDescription": "Please complete the dorm to submit your leave request.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Full Name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "department",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "IT"
+                  },
+                  {
+                    "option": "Finance"
+                  },
+                  {
+                    "option": "Resources"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Start Date",
+              "fieldType": "date",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "End Date",
+              "fieldType": "date",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Email Address",
+              "fieldType": "email",
+              "requiredField": true
+            }
+          ]
+        },
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        -352,
+        0
+      ],
+      "id": "495fe140-9064-4a84-af25-dbfacf9e1599",
+      "name": "On form submission",
+      "webhookId": "da43fa8f-4dfc-479a-a7d6-ab65f59a7be0"
+    },
+    {
+      "parameters": {
+        "operation": "completion",
+        "completionTitle": "Leave Request Submitted successfully",
+        "completionMessage": "Your leave request has been submitted successfully.\n\nYou will receive an email confirmation shortly. Requests longer than 3 days require manager approval.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 2.5,
+      "position": [
+        1792,
+        -128
+      ],
+      "id": "b0430590-33a5-4e3a-864a-932ff8cd8c25",
+      "name": "Form",
+      "webhookId": "3e1dc457-def0-4580-8e08-e01f31372956"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        []
+      ]
+    },
+    "Validate Leave Days": {
+      "main": [
+        [
+          {
+            "node": "Check Existing Request",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare Date Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leave Request Data": {
+      "main": [
+        [
+          {
+            "node": "Calculate Leave Duration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Leave Duration": {
+      "main": [
+        [
+          {
+            "node": "Validate Leave Days",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Existing Request": {
+      "main": [
+        [
+          {
+            "node": "Is Request Duplicate?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Request Duplicate?": {
+      "main": [
+        [
+          {
+            "node": "The Request Is Duplicate",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Save Leave Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Leave Request": {
+      "main": [
+        [
+          {
+            "node": "Leave Over 3 Days",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leave Over 3 Days": {
+      "main": [
+        [
+          {
+            "node": "Prepare Manager Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare Employee Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Manager Email": {
+      "main": [
+        [
+          {
+            "node": "Send Manager Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Employee Email": {
+      "main": [
+        [
+          {
+            "node": "Send Employee Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Date Error": {
+      "main": [
+        [
+          {
+            "node": "Stop Invaild Date Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Leave Request Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Form": {
+      "main": [
+        []
+      ]
+    },
+    "Send Manager Email": {
+      "main": [
+        [
+          {
+            "node": "Form",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Employee Email": {
+      "main": [
+        [
+          {
+            "node": "Form",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "8b29aabf-7585-468c-96e5-32d273cdc998",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ea14c1875db6800390f837088aa322cf5ae66a3347aa0e3fe68e4ef29d4cbfa7"
+  },
+  "nodeGroups": [],
+  "id": "MUqJzjcnWwiepXTC",
+  "tags": []
+}

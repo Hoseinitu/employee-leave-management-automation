@@ -1,0 +1,124 @@
+{
+  "name": "Leave Reports",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "300024d4-f8db-46ae-9576-7b0779fbd3b8",
+      "name": "Manual Report Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "bsfuxbLSKbZsXpUT",
+          "mode": "list",
+          "cachedResultName": "LeaveRequests",
+          "cachedResultUrl": "/projects/qZFL44Xa3P7jrN3O/datatables/bsfuxbLSKbZsXpUT"
+        },
+        "limit": 1000
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        224,
+        0
+      ],
+      "id": "ac16cefe-5cf0-4acf-b229-819ff6d9215e",
+      "name": "Retrieve Leave Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nconst requests = $input.all().map(item => item.json);\n\nconst total = requests.length;\n\nconst approved = requests.filter(item => item.status  === 'Approved');\n\nconst Rejected = requests.filter(item => item.status === 'Rejected');\n\nconst pending = requests.filter(item => item.status === 'Pending Approval');\n\nconst totalApprovedDays = approved.reduce((sum, item) => sum + Number(item.leaveDays), 0);\n\nconst approvalRate = total > 0 ? (approved.length / total) * 100 : 0;\n\nconst rejectionRate = total > 0 ? (Rejected.length / total) * 100 : 0;\n\nreturn[{\n  json: {\n    totalRequests: total,\n    approvedRequests: approved.length,\n    rejectedRequests: Rejected.length,\n    pendingRequests: pending.length,\n    totalApprovedDays: totalApprovedDays,\n    approvalRate: approvalRate.toFixed(2) +\n    '%',\n    rejectionRate: rejectionRate.toFixed(2) +\n    '%'\n   \n  \n  \n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        0
+      ],
+      "id": "c67f5516-e581-4502-93f9-b04e74f705a1",
+      "name": "Generate Leave Statistics"
+    },
+    {
+      "parameters": {
+        "fromEmail": "hr@example.com",
+        "toEmail": "hr@example.com",
+        "subject": "Leave Requests Report",
+        "emailFormat": "text",
+        "text": "=Hello,\n\nHere is the latest leave requests report:\n\nTotal Requests: {{$json.totalRequests}}\n\nApproved Requests: {{$json.approvedRequests}}\n\nRejected Requests: {{$json.rejectedRequests}}\n\nPending Requests: {{$json.pendingRequests}}\n\nTotal Approved Leave Days: {{$json.totalApprovedDays}}\n\nApproval Rate: {{$json.approvalRate}}\n\nRejection Rate: {{$json.rejectionRate}}\n\nProcessed Requests: {{ $json.approvedRequests + $json.rejectedRequests }}\n\n{{ $json.pendingRequests > 0 ? 'There are requests waiting for approval.' : 'There are no pending requests.' }}\n\nRegards,\nHR Department",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        672,
+        0
+      ],
+      "id": "bca53c03-5445-4a11-855a-92adfd6759cf",
+      "name": "Email Leave Report",
+      "webhookId": "9a1f090f-009a-4f65-a894-c168e579143d",
+      "credentials": {
+        "smtp": {
+          "id": "4cXPcBVgXkBKapSf",
+          "name": "SMTP account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Manual Report Trigger": {
+      "main": [
+        [
+          {
+            "node": "Retrieve Leave Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Retrieve Leave Request": {
+      "main": [
+        [
+          {
+            "node": "Generate Leave Statistics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Leave Statistics": {
+      "main": [
+        [
+          {
+            "node": "Email Leave Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "b5c16f16-8ebc-411c-ac1a-6af85b45e38d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ea14c1875db6800390f837088aa322cf5ae66a3347aa0e3fe68e4ef29d4cbfa7"
+  },
+  "nodeGroups": [],
+  "id": "HChhUn7EF2t7uhsT",
+  "tags": []
+}

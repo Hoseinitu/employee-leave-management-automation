@@ -1,0 +1,425 @@
+{
+  "name": "Leave Approval Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "manager",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Request ID",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Decision",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Approved"
+                  },
+                  {
+                    "option": "Rejected"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Rejection",
+              "fieldType": "textarea"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        0,
+        0
+      ],
+      "id": "99e2a0db-54c3-4e2e-91a8-074c3515abd3",
+      "name": "Manager Decision Form",
+      "webhookId": "e688790d-e9f0-44e4-9184-de22322d7e2e"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "bsfuxbLSKbZsXpUT",
+          "mode": "list",
+          "cachedResultName": "LeaveRequests",
+          "cachedResultUrl": "/projects/qZFL44Xa3P7jrN3O/datatables/bsfuxbLSKbZsXpUT"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyValue": "={{ Number($json[\"Request ID\"])}}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        224,
+        0
+      ],
+      "id": "6794277f-bc8b-4bab-a1cc-943d3ce199b9",
+      "name": "Get Leave Request"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "value": "bsfuxbLSKbZsXpUT",
+          "mode": "list",
+          "cachedResultName": "LeaveRequests",
+          "cachedResultUrl": "/projects/qZFL44Xa3P7jrN3O/datatables/bsfuxbLSKbZsXpUT"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyValue": "={{ $json.id }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "={{ $('Manager Decision Form').item.json['Desicion'] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "department",
+              "displayName": "department",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "leaveDays",
+              "displayName": "leaveDays",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "requestDate",
+              "displayName": "requestDate",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "startDate",
+              "displayName": "startDate",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "endDate",
+              "displayName": "endDate",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        688,
+        -16
+      ],
+      "id": "06b82b58-3c80-4fe3-a293-ae1b373b21c4",
+      "name": "Update Leave Request Status"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 4
+          },
+          "conditions": [
+            {
+              "id": "8cd34342-3134-4f6d-b9b8-47c4a65611d3",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "Pending Approval",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.4,
+      "position": [
+        464,
+        0
+      ],
+      "id": "5edc047e-eb4d-4d72-b083-7adc12a26405",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "fromEmail": "hr@example.com",
+        "toEmail": "={{ $('Get Leave Request').item.json.email }}",
+        "subject": "Your Leave Request Desicion",
+        "html": "=Hello,\n\nYour leave request has been reviewed.\n\nDecision: {{ $('Manager Decision Form').item.json['Decision'] }}\n\nReason: {{ $('Manager Decision Form').item.json['Rejection'] || 'Not applicable' }}\n\nRegards,\nHR Department",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1136,
+        -16
+      ],
+      "id": "624057f8-4e85-46a5-a56f-ef5a5e46f335",
+      "name": "Notify Employee",
+      "webhookId": "70556bc8-f48a-4548-b75b-6313669cad89",
+      "credentials": {
+        "smtp": {
+          "id": "4cXPcBVgXkBKapSf",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "DBiwSpfyi7rIESRv",
+          "mode": "list",
+          "cachedResultName": "Approval History",
+          "cachedResultUrl": "/projects/qZFL44Xa3P7jrN3O/datatables/DBiwSpfyi7rIESRv"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "requestid": "={{ Number($('Manager Decision Form').item.json['Request ID']) }}",
+            "decision": "={{ $('Manager Decision Form').item.json['Decision'] }}",
+            "decisionDate": "=decisionDate | {{ $now.toISODate() }}",
+            "rejectionReason": "={{ $('Manager Decision Form').item.json['Rejection'] || '' }}",
+            "employeeName": "={{ $('Get Leave Request').item.json.name }}",
+            "employeeEmail": "={{ $('Get Leave Request').item.json.email }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "requestid",
+              "displayName": "requestid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "employeeName",
+              "displayName": "employeeName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "employeeEmail",
+              "displayName": "employeeEmail",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "decision",
+              "displayName": "decision",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "rejectionReason",
+              "displayName": "rejectionReason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "decisionDate",
+              "displayName": "decisionDate",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        912,
+        -16
+      ],
+      "id": "d71193f8-c23a-4150-9e60-f1d27ee0f571",
+      "name": "Save Approval History"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Manager Decision Form": {
+      "main": [
+        [
+          {
+            "node": "Get Leave Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Leave Request": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Leave Request Status": {
+      "main": [
+        [
+          {
+            "node": "Save Approval History",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Update Leave Request Status",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Save Approval History",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Approval History": {
+      "main": [
+        [
+          {
+            "node": "Notify Employee",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "15d37ca4-31a4-4221-8be8-425a53b18780",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ea14c1875db6800390f837088aa322cf5ae66a3347aa0e3fe68e4ef29d4cbfa7"
+  },
+  "nodeGroups": [],
+  "id": "Ur4CWLXP5isZr2Y8",
+  "tags": []
+}
