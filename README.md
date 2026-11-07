@@ -169,6 +169,19 @@ Email integration
 Version control and technical documentation
 
 Author
+Workflow Screenshots
+
+1. Employee Data Practice
+
+"Employee Data Practice" (screenshots/employee-data-practice.png)
+
+2. Leave Approval Workflow
+
+"Leave Approval Workflow" (screenshots/leave-approval-workflow.png)
+
+3. Leave Reports
+
+"Leave Reports" (screenshots/leave-reports.png)
 
 Hosein
 
