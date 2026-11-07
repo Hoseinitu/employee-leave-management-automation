@@ -1,0 +1,3 @@
+Employee Leave Management Automation | n8n, JavaScript
+
+Designed and developed an automated HR leave management system using n8n and JavaScript. Implemented employee leave request submission, input validation, duplicate detection, conditional manager approval, automated email notifications, approval history tracking, and statistical reporting. Used n8n Data Tables for data management and GitHub for version control and technical documentation.
